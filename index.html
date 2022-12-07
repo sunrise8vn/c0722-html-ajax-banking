@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index</title>
+    <link rel="stylesheet" href="/assets/bootstrap/v5.2.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/fontawesome/v5.2.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+
+    <script src="/assets/bootstrap/v5.2.3/js/bootstrap.bundle.min.js"></script>
+
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Customer Information</h1>
+            <form id="frmCreateCustomer">
+                <div class="mb-3 col-lg-6 float-lg-start pd-10">
+                  <label for="fullNameCre" class="form-label">Full Name</label>
+                  <input type="text" class="form-control" id="fullNameCre">
+                </div>
+                <div class="mb-3 col-lg-6 float-lg-start pd-10">
+                  <label for="emailCre" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="emailCre">
+                </div>
+                <div class="mb-3 col-lg-6 float-lg-start pd-10">
+                    <label for="phoneCre" class="form-label">Phone</label>
+                    <input type="tel" class="form-control" id="phoneCre">
+                  </div>
+                <div class="mb-3 col-lg-6 float-lg-start pd-10">
+                    <label for="addressCre" class="form-label">Address</label>
+                    <input type="text" class="form-control" id="addressCre">
+                </div>
+    
+                <button type="button" id="btnCreate" class="btn btn-outline-primary">Create</button>
+            </form>
+        </header>
+        
+        <div class="content">
+            <table id="tbCustomer" class="table table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">FullName</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Phone</th>
+                    <th scope="col">Address</th>
+                    <th scope="col">Balance</th>
+                    <th scope="col" colspan="2"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- <tr>
+                    <td>1</td>
+                    <td>Mark</td>
+                    <td>Otto@co.cc</td>
+                    <td>2345</td>
+                    <td>28 NTP</td>
+                    <td>1 000 000</td>
+                    <td>
+                        <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalUpdate">
+                            <i class="fas fa-pencil-alt"></i>
+                            Edit
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-outline-danger">
+                            <i class="fas fa-trash-alt"></i>
+                            Delete
+                        </button>
+                    </td>
+                  </tr> -->
+                </tbody>
+              </table>
+        </div>
+    </div>
+
+    <div class="modal" id="modalUpdate" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modal update</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="frmUpdateCustomer">
+              <div class="mb-3 col-lg-6 float-lg-start pd-10">
+                <label for="fullNameUp" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="fullNameUp">
+              </div>
+              <div class="mb-3 col-lg-6 float-lg-start pd-10">
+                <label for="emailUp" class="form-label">Email</label>
+                <input type="email" class="form-control" id="emailUp">
+              </div>
+              <div class="mb-3 col-lg-6 float-lg-start pd-10">
+                <label for="phoneUp" class="form-label">Phone</label>
+                <input type="tel" class="form-control" id="phoneUp">
+              </div>
+              <div class="mb-3 col-lg-6 float-lg-start pd-10">
+                <label for="addressUp" class="form-label">Address</label>
+                <input type="text" class="form-control" id="addressUp">
+              </div>
+
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" id="btnUpdate" class="btn btn-outline-secondary">
+              <i class="fas fa-pencil-alt"></i>
+                Update
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+
+    <script src="/assets/jquery/jquery-3.6.1.min.js"></script>
+
+    <script>
+        let customers = [];
+
+        // let count = 1;
+
+        // let c1 = {
+        //   id: count++,
+        //   fullName: 'NVA',
+        //   email: 'nva@co.cc',
+        //   phone: '2345',
+        //   address: '28 NTP',
+        //   balance: 0
+        // }
+
+        // let c2 = {
+        //   id: count++,
+        //   fullName: 'NVB',
+        //   email: 'nvb@co.cc',
+        //   phone: '3456',
+        //   address: '29 NTP',
+        //   balance: 0
+        // }
+
+        // customers.push(c1);
+        // customers.push(c2);
+
+        const renderCustomer = (obj) => {
+          return `
+            <tr id="tr_${obj.id}">
+              <td>${obj.id}</td>
+              <td>${obj.fullName}</td>
+              <td>${obj.email}</td>
+              <td>${obj.phone}</td>
+              <td>${obj.address}</td>
+              <td>${obj.balance}</td>
+              <td>
+                  <button class="btn btn-outline-secondary" data-id="${obj.id}" data-bs-toggle="modal" data-bs-target="#modalUpdate">
+                      <i class="fas fa-pencil-alt"></i>
+                      Edit
+                  </button>
+              </td>
+              <td>
+                  <button class="btn btn-outline-danger delete" data-id="${obj.id}">
+                      <i class="fas fa-trash-alt"></i>
+                      Delete
+                  </button>
+              </td>
+            </tr>
+          `;
+        }
+
+        // for (let index = 0; index < customers.length; index++) {
+        //   let str = renderCustomer(customers[index]);
+
+        //   $("#tbCustomer tbody").prepend(str);
+        // }
+
+        $('#btnCreate').on("click", function () {
+          let customer = {
+            id: null,
+            fullName: $('#fullNameCre').val(),
+            email: $('#emailCre').val(),
+            phone: $('#phoneCre').val(),
+            address: $('#addressCre').val(),
+            balance: 0
+          }
+
+          createCustomer(customer);
+        })
+
+        function createCustomer(customer) {
+          $.ajax({
+            "headers": {
+              "accept": "application/json",
+              "content-type": "application/json"
+            },
+            type: "POST",
+            url: "http://localhost:3000/customers",
+            data: JSON.stringify(customer)
+          })
+          .done((data) => {
+            let str = renderCustomer(data);
+
+            $("#tbCustomer tbody").prepend(str);
+
+            removeClickEventDeleteButton();
+            handleClickDeleteButton();
+          })
+          .fail((error) => {
+            console.log(error);
+          })
+        }
+
+        function handleClickDeleteButton() {
+          $('.delete').on('click', function() {
+            let id = $(this).data('id');
+
+            $.ajax({
+              "headers": {
+                "accept": "application/json",
+                "content-type": "application/json"
+              },
+              type: "DELETE",
+              url: "http://localhost:3000/customers/" + id
+            })
+            .done(() => {
+              $("#tr_" + id).remove();
+            })
+            .fail((error) => {
+              console.log(error);
+            })
+
+          })
+        }
+
+        function removeClickEventDeleteButton() {
+          $('.delete').off("click");
+        }
+
+
+        function getAllCustomers() {
+          $.ajax({
+            "header": {
+              "accept": "application/json",
+              "content-type": "application/json"
+            },
+            type: "GET",
+            url: "http://localhost:3000/customers"
+          })
+          .done((data) => {
+            console.log(data);
+
+            // data.forEach(element => {
+            //   let str = renderCustomer(element);
+
+            //    $("#tbCustomer tbody").prepend(str);
+            // });
+
+            $.each(data, (i, item) => {
+              let str = renderCustomer(item);
+
+              $("#tbCustomer tbody").prepend(str);
+            })
+
+            handleClickDeleteButton();
+          })
+          .fail((error) => {
+            console.log(error);
+          })
+        }
+
+        getAllCustomers();
+
+    </script>
+
+
+</body>
+</html>
