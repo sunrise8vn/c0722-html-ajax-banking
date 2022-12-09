@@ -16,14 +16,14 @@
     <div class="container">
         <header>
             <h1>Customer Information</h1>
-            <form id="frmCreateCustomer">
+            <form id="frmCreateCustomer" method="post">
                 <div class="mb-3 col-lg-6 float-lg-start pd-10">
                   <label for="fullNameCre" class="form-label">Full Name</label>
-                  <input type="text" class="form-control" id="fullNameCre">
+                  <input type="text" class="form-control" id="fullNameCre" name="fullNameCre">
                 </div>
                 <div class="mb-3 col-lg-6 float-lg-start pd-10">
                   <label for="emailCre" class="form-label">Email</label>
-                  <input type="email" class="form-control" id="emailCre">
+                  <input type="email" class="form-control" id="emailCre" name="emailCre">
                 </div>
                 <div class="mb-3 col-lg-6 float-lg-start pd-10">
                     <label for="phoneCre" class="form-label">Phone</label>
@@ -85,22 +85,28 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
+            <div class="modal-alert-danger hide">
+
+            </div>
             <form id="frmUpdateCustomer">
-              <div class="mb-3 col-lg-6 float-lg-start pd-10">
-                <label for="fullNameUp" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="fullNameUp">
-              </div>
-              <div class="mb-3 col-lg-6 float-lg-start pd-10">
-                <label for="emailUp" class="form-label">Email</label>
-                <input type="email" class="form-control" id="emailUp">
-              </div>
-              <div class="mb-3 col-lg-6 float-lg-start pd-10">
-                <label for="phoneUp" class="form-label">Phone</label>
-                <input type="tel" class="form-control" id="phoneUp">
-              </div>
-              <div class="mb-3 col-lg-6 float-lg-start pd-10">
-                <label for="addressUp" class="form-label">Address</label>
-                <input type="text" class="form-control" id="addressUp">
+              <input type="hidden" id="idUp">
+              <div class="row g-3">
+                <div class="mb-3 col-lg-6 float-lg-start">
+                  <label for="fullNameUp" class="form-label">Full Name</label>
+                  <input type="text" class="form-control" id="fullNameUp" name="fullNameUp">
+                </div>
+                <div class="mb-3 col-lg-6 float-lg-start">
+                  <label for="emailUp" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="emailUp" name="emailUp">
+                </div>
+                <div class="mb-3 col-lg-6 float-lg-start">
+                  <label for="phoneUp" class="form-label">Phone</label>
+                  <input type="tel" class="form-control" id="phoneUp" name="phoneUp">
+                </div>
+                <div class="mb-3 col-lg-6 float-lg-start">
+                  <label for="addressUp" class="form-label">Address</label>
+                  <input type="text" class="form-control" id="addressUp" name="addressUp">
+                </div>
               </div>
 
             </form>
@@ -118,32 +124,41 @@
     
 
     <script src="/assets/jquery/jquery-3.6.1.min.js"></script>
+    <script src="/assets/jquery/jquery.validate.min.js"></script>
+    <script src="/assets/js/app.base.js"></script>
 
     <script>
-        let customers = [];
 
-        // let count = 1;
+        const page = {
+          urls: {
+            getAllCustomers: AppBase.API_CUSTOMER,
+            getCustomerById: AppBase.API_CUSTOMER,
+            saveCreate: AppBase.API_CUSTOMER,
+            saveUpdate: AppBase.API_CUSTOMER
+          },
+          elements: {},
+          commands: {},
+          dialogs: {
+            elements: {},
+            commands: {}
+          }
+        }
 
-        // let c1 = {
-        //   id: count++,
-        //   fullName: 'NVA',
-        //   email: 'nva@co.cc',
-        //   phone: '2345',
-        //   address: '28 NTP',
-        //   balance: 0
-        // }
 
-        // let c2 = {
-        //   id: count++,
-        //   fullName: 'NVB',
-        //   email: 'nvb@co.cc',
-        //   phone: '3456',
-        //   address: '29 NTP',
-        //   balance: 0
-        // }
+        page.elements.frmCreateCustomer = $('#frmCreateCustomer');
+        page.elements.fullNameCre = $('#fullNameCre');
+        page.elements.emailCre = $('#emailCre');
+        page.elements.phoneCre = $('#phoneCre');
+        page.elements.addressCre = $('#addressCre');
+        page.elements.btnCreate = $('#btnCreate');
 
-        // customers.push(c1);
-        // customers.push(c2);
+        page.dialogs.elements.modalUpdate = $('#modalUpdate');
+        page.dialogs.elements.frmUpdateCustomer = $('#frmUpdateCustomer');
+        page.dialogs.elements.fullNameUp = $('#fullNameUp');
+        page.dialogs.elements.emailUp = $('#emailUp');
+        page.dialogs.elements.phoneUp = $('#phoneUp');
+        page.dialogs.elements.addressUp = $('#addressUp');
+        page.dialogs.elements.btnUpdate = $('#btnUpdate');
 
         const renderCustomer = (obj) => {
           return `
@@ -155,7 +170,7 @@
               <td>${obj.address}</td>
               <td>${obj.balance}</td>
               <td>
-                  <button class="btn btn-outline-secondary" data-id="${obj.id}" data-bs-toggle="modal" data-bs-target="#modalUpdate">
+                  <button class="btn btn-outline-secondary edit" data-id="${obj.id}">
                       <i class="fas fa-pencil-alt"></i>
                       Edit
                   </button>
@@ -170,33 +185,28 @@
           `;
         }
 
-        // for (let index = 0; index < customers.length; index++) {
-        //   let str = renderCustomer(customers[index]);
 
-        //   $("#tbCustomer tbody").prepend(str);
-        // }
+        page.elements.btnCreate.on("click", function () {
+          page.elements.frmCreateCustomer.submit();
+        })
 
-        $('#btnCreate').on("click", function () {
+        function createCustomer() {
           let customer = {
             id: null,
-            fullName: $('#fullNameCre').val(),
-            email: $('#emailCre').val(),
-            phone: $('#phoneCre').val(),
-            address: $('#addressCre').val(),
+            fullName: page.elements.fullNameCre.val(),
+            email: page.elements.emailCre.val(),
+            phone: page.elements.phoneCre.val(),
+            address: page.elements.addressCre.val(),
             balance: 0
           }
 
-          createCustomer(customer);
-        })
-
-        function createCustomer(customer) {
           $.ajax({
             "headers": {
               "accept": "application/json",
               "content-type": "application/json"
             },
             type: "POST",
-            url: "http://localhost:3000/customers",
+            url: page.urls.saveCreate,
             data: JSON.stringify(customer)
           })
           .done((data) => {
@@ -204,13 +214,84 @@
 
             $("#tbCustomer tbody").prepend(str);
 
-            removeClickEventDeleteButton();
+            removeClickEventAllButton();
+
+            page.commands.handleClickEditButton();
             handleClickDeleteButton();
           })
           .fail((error) => {
             console.log(error);
           })
         }
+
+        page.commands.handleClickEditButton = () => {
+          $('.edit').on('click', function () {
+            let id = $(this).data('id');
+
+            $('#idUp').val(id);
+
+            $.ajax({
+              "headers": {
+                "accept": "application/json",
+                "content-type": "application/json"
+              },
+              type: "GET",
+              url: page.urls.getCustomerById + "/" + id
+            })
+            .done((data) => {
+              page.dialogs.elements.fullNameUp.val(data.fullName);
+              page.dialogs.elements.emailUp.val(data.email);
+              page.dialogs.elements.phoneUp.val(data.phone);
+              page.dialogs.elements.addressUp.val(data.address);
+
+              page.dialogs.elements.modalUpdate.modal('show');
+            })
+            .fail((error) => {
+              console.log(error);
+            })
+
+          })
+        }
+
+        function updateCustomer() {
+          let customer = {
+            fullName: $('#fullNameUp').val(),
+            email: $('#emailUp').val(),
+            phone: $('#phoneUp').val(),
+            address: $('#addressUp').val()
+          }
+          
+          let id = $('#idUp').val()
+
+          $.ajax({
+            "headers": {
+              "accept": "application/json",
+              "content-type": "application/json"
+            },
+            type: "PATCH",
+            url: page.urls.saveUpdate + "/" + id,
+            data: JSON.stringify(customer)
+          })
+          .done((data) => {
+            let str = renderCustomer(data);
+
+            $('#tr_' + id).replaceWith(str);
+
+            $('#modalUpdate').modal('hide');
+
+            removeClickEventAllButton();
+
+            page.commands.handleClickEditButton();
+            handleClickDeleteButton();
+          })
+          .fail((error) => {
+            console.log(error);
+          })
+        }
+
+        $('#btnUpdate').on('click', () => {
+          $('#frmUpdateCustomer').submit();
+        })
 
         function handleClickDeleteButton() {
           $('.delete').on('click', function() {
@@ -234,34 +315,29 @@
           })
         }
 
-        function removeClickEventDeleteButton() {
+        function removeClickEventAllButton() {
+          $('.edit').off("click");
           $('.delete').off("click");
         }
 
-
-        function getAllCustomers() {
+        page.commands.getAllCustomers = () => {
           $.ajax({
             "header": {
               "accept": "application/json",
               "content-type": "application/json"
             },
             type: "GET",
-            url: "http://localhost:3000/customers"
+            url: page.urls.getAllCustomers
           })
           .done((data) => {
-            console.log(data);
-
-            // data.forEach(element => {
-            //   let str = renderCustomer(element);
-
-            //    $("#tbCustomer tbody").prepend(str);
-            // });
 
             $.each(data, (i, item) => {
               let str = renderCustomer(item);
 
               $("#tbCustomer tbody").prepend(str);
             })
+
+            page.commands.handleClickEditButton();
 
             handleClickDeleteButton();
           })
@@ -270,7 +346,96 @@
           })
         }
 
-        getAllCustomers();
+        page.dialogs.commands.closeModalUpdate = () => {
+          page.dialogs.elements.modalUpdate.on("hidden.bs.modal", () => {
+            page.dialogs.elements.frmUpdateCustomer[0].reset();
+            page.dialogs.elements.frmUpdateCustomer.validate().resetForm();
+          })
+        }
+
+        page.elements.frmCreateCustomer.validate({
+          rules: {
+            fullNameCre: {
+              required: true,
+              minlength: 5
+            },
+            emailCre: {
+              required: true,
+              laxEmail: true
+            }
+          },
+          messages: {
+            fullNameCre: {
+              required: 'Vui lòng nhập họ tên',
+              minlength: 'Độ dài tối thiểu của họ tên là ${0} ký tự'
+            },
+            emailCre: {
+              required: 'Vui lòng nhập email',
+              laxEmail: 'Vui lòng nhập đúng kiểu email'
+            }
+          },
+          submitHandler: () => {
+            createCustomer();
+          }
+        })
+
+        page.dialogs.elements.frmUpdateCustomer.validate({
+          rules: {
+            fullNameUp: {
+              required: true,
+              minlength: 5
+            },
+            emailUp: {
+              required: true,
+              laxEmail: true
+            }
+          },
+          messages: {
+            fullNameUp: {
+              required: 'Vui lòng nhập họ tên',
+              minlength: 'Độ dài tối thiểu của họ tên là ${0} ký tự'
+            },
+            emailUp: {
+              required: 'Vui lòng nhập email',
+              laxEmail: 'Vui lòng nhập đúng kiểu email'
+            }
+          },
+          errorLabelContainer: "#modalUpdate .modal-alert-danger",
+          errorPlacement: function (error, element) {
+              error.appendTo("#modalUpdate .modal-alert-danger");
+          },
+          showErrors: function(errorMap, errorList) {
+              if (this.numberOfInvalids() > 0) {
+                  $("#modalUpdate .modal-alert-danger").removeClass("hide").addClass("show");
+              } else {
+                  $("#modalUpdate .modal-alert-danger").removeClass("show").addClass("hide").empty();
+                  $("#frmUpdateCustomer input.error").removeClass("error");
+              }
+              this.defaultShowErrors();
+          },
+          submitHandler: () => {
+            updateCustomer();
+          }
+        })
+
+        $.validator.addMethod("laxEmail", function(value, element) {
+          return this.optional( element ) || /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,3}$/.test( value );
+        }, 'Vui lòng nhập đúng định dạng email');
+
+
+        page.initializeEventControl = () => {
+          page.dialogs.commands.closeModalUpdate();
+        }
+
+        page.commands.loadData = () => {
+          page.commands.getAllCustomers();
+        }
+
+        $(() => {
+          page.commands.loadData();
+
+          page.initializeEventControl();
+        })
 
     </script>
 
